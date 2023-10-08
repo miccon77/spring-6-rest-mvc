@@ -4,6 +4,7 @@ import guru.springframework.spring6restmvc.model.Customer;
 import java.time.LocalDateTime;
 import java.util.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /** Created by jt, Spring Framework Guru. */
 @Service
@@ -46,6 +47,47 @@ public class CustomerServiceImpl implements CustomerService {
   }
 
   @Override
+  public void patchCustomerById(UUID customerId, Customer customer) {
+    Customer existing = customerMap.get(customerId);
+
+    if (StringUtils.hasText(customer.getName())) {
+      existing.setName(customer.getName());
+    }
+  }
+
+  @Override
+  public Customer saveNewCustomer(Customer customer) {
+
+    Customer savedCustomer =
+        Customer.builder()
+            .id(UUID.randomUUID())
+            .version(1)
+            .updateDate(LocalDateTime.now())
+            .createdDate(LocalDateTime.now())
+            .name(customer.getName())
+            .build();
+
+    customerMap.put(savedCustomer.getId(), savedCustomer);
+
+    return savedCustomer;
+  }
+
+  @Override
+  public void updateCustomerById(UUID customerId, Customer customer) {
+    Customer existingCustomer = this.customerMap.get(customerId);
+    existingCustomer.setName(customer.getName());
+    existingCustomer.setVersion(customer.getVersion());
+    existingCustomer.setCreatedDate(customer.getCreatedDate());
+    existingCustomer.setUpdateDate(LocalDateTime.now());
+    this.customerMap.put(customerId, existingCustomer);
+  }
+
+  @Override
+  public void deleteCustomerById(UUID customerId) {
+      this.customerMap.remove(customerId);
+  }
+
+  @Override
   public Customer getCustomerById(UUID uuid) {
     return customerMap.get(uuid);
   }
@@ -53,19 +95,5 @@ public class CustomerServiceImpl implements CustomerService {
   @Override
   public List<Customer> getAllCustomers() {
     return new ArrayList<>(customerMap.values());
-  }
-
-  @Override
-  public Customer saveNewCustomer(Customer customer) {
-    Customer savedCustomer =
-        Customer.builder()
-            .createdDate(LocalDateTime.now())
-            .name(customer.getName())
-            .id(UUID.randomUUID())
-            .updateDate(LocalDateTime.now())
-            .version(customer.getVersion())
-            .build();
-    this.customerMap.put(savedCustomer.getId(), savedCustomer);
-    return savedCustomer;
   }
 }
