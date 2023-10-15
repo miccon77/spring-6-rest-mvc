@@ -53,12 +53,14 @@ public class CustomerServiceImpl implements CustomerService {
         if (StringUtils.hasText(customer.getName())) {
             existing.setName(customer.getName());
         }
+
         return Optional.of(existing);
     }
 
     @Override
     public Boolean deleteCustomerById(UUID customerId) {
         customerMap.remove(customerId);
+
         return true;
     }
 
